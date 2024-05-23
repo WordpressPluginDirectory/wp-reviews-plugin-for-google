@@ -22,7 +22,6 @@ wp_mail('support@trustindex.io', $subject, $message, [ 'From: '. $email, 'Conten
 exit;
 }
 ?>
-<h1 class="ti-header-title"><?php echo __('Feature request', 'trustindex-plugin'); ?></h1>
 <div class="ti-box ti-feature-request">
 <div class="ti-box-inner">
 <div class="ti-box-header"><?php echo __('Missing a feature?', 'trustindex-plugin'); ?></div>
