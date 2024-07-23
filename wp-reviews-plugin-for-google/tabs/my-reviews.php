@@ -59,31 +59,31 @@ update_option($pluginManagerInstance->get_option_name('reply-generated'), 1, fal
 exit;
 }
 
-if (isset($_POST['review_download_timestamp'])) {
+if (isset($_POST['download_data'])) {
 check_admin_referer('ti-download-reviews');
-$pageDetails = isset($_POST['page_details']) ? json_decode(stripcslashes($_POST['page_details']), true) : null;
-if (isset($pageDetails['reviews']) && is_array($pageDetails['reviews']) && $pageDetails['reviews']) {
-$pluginManagerInstance->save_reviews($pageDetails['reviews']);
+$data = json_decode(stripcslashes($_POST['download_data']), true);
+if (isset($data['reviews']) && is_array($data['reviews']) && $data['reviews']) {
+$pluginManagerInstance->save_reviews($data['reviews']);
 if (!$pluginManagerInstance->getNotificationParam('review-download-finished', 'hidden')) {
 $pluginManagerInstance->setNotificationParam('review-download-finished', 'active', true);
 }
 $pluginManagerInstance->sendNotificationEmail('review-download-finished');
 }
-$oldPageDetails = $pluginManagerInstance->getPageDetails();
-if (isset($pageDetails['name'])) {
-$oldPageDetails['name'] = $pageDetails['name'];
-if (isset($oldPageDetails['address'])) {
-$oldPageDetails['address'] = $pageDetails['address'];
+$pageDetails = $pluginManagerInstance->getPageDetails();
+if (isset($data['name'])) {
+$pageDetails['name'] = $data['name'];
+if (isset($pageDetails['address'])) {
+$pageDetails['address'] = $data['address'];
 }
-if (isset($oldPageDetails['avatar_url'])) {
-$oldPageDetails['avatar_url'] = $pageDetails['avatar_url'];
+if (isset($pageDetails['avatar_url'])) {
+$pageDetails['avatar_url'] = $data['avatar_url'];
 }
-$oldPageDetails['rating_number'] = $pageDetails['rating_number'];
-$oldPageDetails['rating_score'] = $pageDetails['rating_score'];
-update_option($pluginManagerInstance->get_option_name('page-details'), $oldPageDetails, false);
+$pageDetails['rating_number'] = $data['rating_number'];
+$pageDetails['rating_score'] = $data['rating_score'];
+update_option($pluginManagerInstance->get_option_name('page-details'), $pageDetails, false);
 $GLOBALS['wp_object_cache']->delete($pluginManagerInstance->get_option_name('page-details'), 'options');
 }
-update_option($pluginManagerInstance->get_option_name('download-timestamp'), (int)$_POST['review_download_timestamp'], false);
+update_option($pluginManagerInstance->get_option_name('download-timestamp'), time() + (int)$data['next_update_available'], false);
 if (!$pluginManagerInstance->getNotificationParam('review-download-available', 'hidden')) {
 $pluginManagerInstance->setNotificationParam('review-download-available', 'do-check', true);
 $pluginManagerInstance->setNotificationParam('review-download-available', 'active', false);
@@ -134,13 +134,13 @@ jQuery(".ti-review-content").TI_shorten({
 });
 jQuery(".ti-review-content").TI_format();
 ');
-$downloadTimestamp = get_option($pluginManagerInstance->get_option_name('download-timestamp'), time() - 1);
+$downloadTimestamp = get_option($pluginManagerInstance->get_option_name('download-timestamp'), time());
 $pageDetails = $pluginManagerInstance->getPageDetails();
 ?>
 <div class="ti-header-title"><?php echo __('My Reviews', 'trustindex-plugin'); ?></div>
 <div class="ti-box">
 <?php if (!$isReviewDownloadInProgress): ?>
-<?php if ($downloadTimestamp < time()): ?>
+<?php if ($downloadTimestamp <= time()): ?>
 <div class="ti-notice ti-d-none ti-notice-info" id="ti-connect-info">
 <p><?php echo __("A popup window should be appear! Please, go to there and continue the steps! (If there is no popup window, you can check the the browser's popup blocker)", 'trustindex-plugin'); ?></p>
 </div>
@@ -159,7 +159,7 @@ $pageDetails = $pluginManagerInstance->getPageDetails();
 <input type="hidden" id="ti-noreg-page-id" value="<?php echo esc_attr($pageDetails['id']); ?>" />
 <input type="hidden" id="ti-noreg-webhook-url" value="<?php echo $pluginManagerInstance->getWebhookUrl(); ?>" />
 <input type="hidden" id="ti-noreg-email" value="<?php echo get_option('admin_email'); ?>" />
-<input type="hidden" id="ti-noreg-version" value="11.8.4" />
+<input type="hidden" id="ti-noreg-version" value="<?php echo esc_attr($pluginManagerInstance->getVersion()); ?>" />
 
 <?php
 $reviewDownloadToken = get_option($pluginManagerInstance->get_option_name('review-download-token'));
@@ -172,8 +172,8 @@ update_option($pluginManagerInstance->get_option_name('review-download-token'), 
 <?php endif; ?>
 <div class="ti-upgrade-notice">
 <strong><?php echo __('UPGRADE to PRO Features', 'trustindex-plugin'); ?></strong>
-<p><?php echo sprintf(__('Automatic review update, creating unlimited review widgets, downloading and displaying all reviews, %d review platforms available!', 'trustindex-plugin'), 131); ?></p>
-<a href="https://www.trustindex.io/ti-redirect.php?a=sys&c=wp-google-pro" class="ti-btn"><?php echo __('Create a Free Account for More Features', 'trustindex-plugin'); ?></a>
+<p><?php echo sprintf(__('Automatic review update, creating unlimited review widgets, downloading and displaying all reviews, %d review platforms available!', 'trustindex-plugin'), 133); ?></p>
+<?php echo $pluginManagerInstance->getProFeatureButton('wp-google-pro'); ?>
 </div>
 
 <?php if (!count($reviews)): ?>
@@ -206,6 +206,7 @@ update_option($pluginManagerInstance->get_option_name('review-download-token'), 
 <td>
 <div class="ti-review-content"><?php echo $reviewText; ?></div>
 <?php
+
 $state = 'reply';
 if ($review->reply) {
 $state = 'replied';
@@ -248,6 +249,7 @@ $hideReplyButton = get_option($pluginManagerInstance->get_option_name('review-do
 <a href="<?php echo esc_attr($review->id); ?>" data-nonce="<?php echo wp_create_nonce('ti-save-reply'); ?>" class="ti-btn ti-btn-sm btn-post-reply"><?php echo sprintf(__('Upload reply to %s', 'trustindex-plugin'), 'Google'); ?></a>
 <a href="#" class="ti-btn ti-btn-sm ti-btn-no-background btn-hide-ai-reply"><?php echo __('Cancel', 'trustindex-plugin'); ?></a>
 </div>
+
 <div class="ti-reply-box-state state-replied">
 <div class="ti-button-dropdown-title">
 <strong><?php echo sprintf(__('Reply by %s', 'trustindex-plugin'), $pageDetails['name']); ?></strong>
@@ -258,6 +260,7 @@ $hideReplyButton = get_option($pluginManagerInstance->get_option_name('review-do
 <a href="<?php echo esc_attr($review->id); ?>" class="ti-btn ti-btn-sm ti-btn-white btn-show-edit-reply"><?php echo __('Edit reply', 'trustindex-plugin'); ?></a>
 <?php endif; ?>
 </div>
+
 <div class="ti-reply-box-state state-edit-reply">
 <div class="ti-button-dropdown-title">
 <strong><?php echo __('Edit reply', 'trustindex-plugin'); ?></strong>
