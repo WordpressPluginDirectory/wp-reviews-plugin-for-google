@@ -19,6 +19,7 @@ $highlight = "";
 if (!is_null($start)) {
 $highlight = $start . ',' . $length;
 }
+// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 $wpdb->update($pluginManagerInstance->get_tablename('reviews'), ['highlight' => $highlight], ['id' => $id]);
 wp_cache_delete('ti-reviews-cache-'.$pluginManagerInstance->getShortName());
 }
@@ -29,9 +30,11 @@ check_admin_referer('ti-toggle-hide');
 $id = (int)$_GET['toggle-hide'];
 if ($id) {
 $hidden = 1;
+// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 if ($wpdb->get_var($wpdb->prepare('SELECT hidden FROM %i WHERE id = %s', $pluginManagerInstance->get_tablename('reviews'), $id))) {
 $hidden = 0;
 }
+// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 $wpdb->update($pluginManagerInstance->get_tablename('reviews'), ['hidden' => $hidden], ['id' => $id]);
 wp_cache_delete('ti-reviews-cache-'.$pluginManagerInstance->getShortName());
 }
@@ -52,6 +55,7 @@ $id = (int)$_POST['id'];
 }
 $reply = wp_kses_post(wp_unslash($_POST['save-reply']));
 if ($id && $reply) {
+// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 $wpdb->update($pluginManagerInstance->get_tablename('reviews'), ['reply' => $reply], ['id' => $id]);
 wp_cache_delete('ti-reviews-cache-'.$pluginManagerInstance->getShortName());
 }
@@ -64,6 +68,7 @@ exit;
 
 if (isset($_POST['download_data'])) {
 check_admin_referer('ti-download-reviews');
+// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 $data = json_decode(wp_unslash($_POST['download_data']), true);
 if (isset($data['is_new_reviews']) && $data['is_new_reviews']) {
 if (isset($data['reviews']) && is_array($data['reviews']) && $data['reviews']) {
@@ -228,7 +233,7 @@ echo esc_html(sprintf(__('Automatic review update, creating unlimited review wid
 <td class="ti-text-center source-<?php echo esc_attr(ucfirst("google")); ?>"><?php echo wp_kses_post(trustindex_plugin_write_rating_stars($review->rating)); ?></td>
 <td class="ti-text-center"><?php echo esc_html($review->date); ?></td>
 <td>
-<div class="ti-review-content"><?php echo wp_kses_post($reviewText); ?></div>
+<div class="ti-review-content"><?php echo wp_kses_post($reviewText ? $reviewText : ""); ?></div>
 <?php
 
 $state = 'reply';
