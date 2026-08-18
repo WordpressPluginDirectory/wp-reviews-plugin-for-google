@@ -141,7 +141,7 @@ return admin_url('admin-ajax.php') . '?action='. $this->getWebhookAction();
 public function getProFeatureButton($campaignId)
 {
 
-return '<a class="ti-btn" href="https://lp.trustindex.io/'.$this->getShortName().'-wp/?a=sys&c='. $campaignId .'" target="_blank">'. __('Create a Free Account for More Features', 'wp-reviews-plugin-for-google') .'</a>';
+return '<a class="ti-btn" href="https://www.trustindex.io/?a=sys&c='. $campaignId .'" target="_blank">'. __('Create a Free Account for More Features', 'wp-reviews-plugin-for-google') .'</a>';
 }
 public function is_review_download_in_progress()
 {
@@ -872,8 +872,7 @@ $types = [
 'icon' => 'dashicons-info'
 ]
 ];
-return '<div style="margin:20px 0px; padding:10px; '. $types[ $type ]['css'] .' border-radius: 5px">'
-. '<span class="dashicons '. $types[ $type ]['icon'] .'"></span> <strong>'. strtoupper($type) .'</strong>'
+return '<div style="margin:20px 0px; padding:15px; '. $types[ $type ]['css'] .' border-radius: 5px">'
 . ($newline_content ? '<br />' : "")
 . $content
 . '</div>';
@@ -924,7 +923,7 @@ $className = 'TrustindexPlugin_' . $forcePlatform;
 if (!class_exists($className)) {
 return wp_kses_post($this->frontEndErrorForAdmins(ucfirst($forcePlatform) . ' plugin is not active or not found!'));
 }
-$chosedPlatform = new $className($forcePlatform, $filePath, "do-not-care-13.2.8", "do-not-care-Widgets for Google Reviews", "do-not-care-Google");
+$chosedPlatform = new $className($forcePlatform, $filePath, "do-not-care-13.3.2", "do-not-care-Widgets for Google Reviews", "do-not-care-Google");
 $chosedPlatform->setNotificationParam('not-using-no-widget', 'active', false);
 if (!$chosedPlatform->is_noreg_linked()) {
 /* translators: %s: Platform name */
@@ -951,12 +950,15 @@ else {
 return wp_kses_post($this->frontEndErrorForAdmins(__('Your shortcode is deficient: Trustindex Widget ID is empty! Example: ', 'wp-reviews-plugin-for-google') . '<br /><code>['.$this->get_shortcode_name().' data-widget-id="478dcc2136263f2b3a3726ff"]</code>'));
 }
 }
-public function frontEndErrorForAdmins($text)
+public function frontEndErrorForAdmins($text, $title = '', $type = 'error')
 {
 if (!current_user_can('manage_options')) {
 return " ";
 }
-return self::get_alertbox('error', ' @ <strong>'. __('Trustindex plugin', 'wp-reviews-plugin-for-google') .'</strong> <i style="opacity: 0.65">('. __('This message is not be visible to visitors in public mode.', 'wp-reviews-plugin-for-google') .')</i><br /><br />'. $text, false);
+if ('' === $title) {
+$title = __('Trustindex plugin', 'wp-reviews-plugin-for-google');
+}
+return self::get_alertbox($type, '<strong>'.$title.'</strong><br />'.$text.'<br /><i style="opacity: 0.65">('. sprintf(__('This message is not be visible to visitors in public mode.') .')</i>', 'wp-reviews-plugin-for-google'), false);
 }
 
 
@@ -1173,7 +1175,7 @@ public static $widget_templates = array (
  'name' => 'Slider I. - with header',
  'type' => 'slider',
  'is-active' => true,
- 'is-popular' => false,
+ 'is-popular' => true,
  'is-top-rated-badge' => false,
  'params' => 
  array (
@@ -1197,7 +1199,7 @@ public static $widget_templates = array (
  'name' => 'Slider I. - with Top Rated header and photos',
  'type' => 'slider',
  'is-active' => false,
- 'is-popular' => true,
+ 'is-popular' => false,
  'is-top-rated-badge' => true,
  'params' => 
  array (
@@ -3258,7 +3260,7 @@ private static $widget_rating_texts = array (
  1 => 'onder gemiddeld',
  2 => 'gemiddeld',
  3 => 'goed',
- 4 => 'uitstekend',
+ 4 => 'uitstekende',
  ),
  'ar' => 
  array (
@@ -3538,7 +3540,7 @@ private static $widget_rating_texts = array (
  1 => 'Onder het gemiddelde',
  2 => 'Gemiddeld',
  3 => 'Goed',
- 4 => 'Uitstekend',
+ 4 => 'Uitstekende',
  ),
  'no' => 
  array (
@@ -5323,7 +5325,7 @@ public static $widget_date_format_locales = array (
  'cy' => '%d %s yn ôl|heddiw|diwrnod|diwrnod|wythnos|wythnosau|mis|mis|flwyddyn|flynyddoedd',
  'da' => '%d %s siden|i dag|dag|dage|uge|uger|måned|måneder|år|år',
  'de' => 'vor %d %s|Heute|Tag|Tagen|Woche|Wochen|Monat|Monaten|Jahr|Jahren',
- 'el' => 'πριν από %d ημέρα|σήμερα|ημέρα|ημέρες|εβδομάδα|εβδομάδες|μήνα|μήνες|χρόνο|χρόνια',
+ 'el' => 'πριν από %d %s|σήμερα|ημέρα|ημέρες|εβδομάδα|εβδομάδες|μήνα|μήνες|χρόνο|χρόνια',
  'es' => 'hace %d %s|hoy|día|días|semana|semanas|mes|meses|año|años',
  'et' => '%d %s tagasi|täna|päev|päeva|nädal|nädalat|kuu|kuud|aasta|aastat',
  'fa' => '%d %s قبل|امروز|روز|روز|هفته|هفته|ماه|ماه|سال|سال',
@@ -6024,7 +6026,7 @@ return wp_kses_post(preg_replace('/\r\n|\r|\n/', "\n", trim(html_entity_decode($
 private function getProfileImageUrl($imageUrl, $layoutId, $sizeMultiply = 1) {
 
 $size = $this->getProfileImageSize($layoutId) * $sizeMultiply;
-$imageUrl = preg_replace('/([=-])(?:s\d+|w\d+-h\d+)(-|$)/', "$1w$size-h$size$2", $imageUrl);
+$imageUrl = preg_replace('/([=-])(?:s\d+|w\d+-h\d+)(-|$)/', "\$1w$size-h$size\$2", $imageUrl);
 return $imageUrl;
 }
 
@@ -6039,7 +6041,7 @@ private function getHeaderProfileImageSize($layoutId)
 {
 return 65;
 }
-public function renderWidgetFrontend($tiPublicId = null)
+public function renderWidgetFrontend($tiPublicId = null, $isManualEmbed = false)
 {
 $this->enqueueLoaderScript();
 if ($tiPublicId) {
@@ -6077,6 +6079,12 @@ $preContent .= '</template></pre>';
 $text = sprintf(__('There are no reviews on your %s platform.', 'wp-reviews-plugin-for-google'), ucfirst($this->getShortName()));
 
 return $this->frontEndErrorForAdmins($text);
+}
+if ($this->is_trustindex_connected()) {
+$title = __('You are still using the free widget below.', 'wp-reviews-plugin-for-google');
+$text = __('Switch to the Pro version by replacing the shortcode.', 'wp-reviews-plugin-for-google')
+.'<br /><a href="'.esc_url('https://admin.trustindex.io/widget').'" target="_blank" rel="noopener noreferrer">'.__('Find the shortcode in the widget list.', 'wp-reviews-plugin-for-google').'</a>';
+$preContent = $this->frontEndErrorForAdmins($text, $title, 'warning').$preContent;
 }
 }
 $attributesHtml = implode(' ', array_map(function($attribute, $value) {
@@ -6335,9 +6343,9 @@ $styleId = (int)$this->getWidgetOption('style-id');
 $setId = $this->getWidgetOption('scss-set');
 $language = $this->getWidgetOption('lang', false, $isPreview);
 $widgetTemplate = self::$widget_templates['templates'][$styleId];
-$showStars = $this->getWidgetOption('show-stars', false, $isPreview);
-if (self::$widget_styles[$setId]['hide-stars'] === 'custom') {
-$showStars = 'custom';
+$showStars = (int) $this->getWidgetOption('show-stars', false, $isPreview);
+if ('custom' === self::$widget_styles[$setId]['hide-stars']) {
+$showStars = 2;
 }
 preg_match('/<!-- R-LIST -->(.*)<!-- R-LIST -->/', $content, $matches);
 if (isset($matches[1])) {
@@ -6359,7 +6367,7 @@ $date = str_replace(self::$widget_month_names['en'], self::$widget_month_names[$
 }
 }
 $ratingContent = $this->get_rating_stars($r->rating, $showStars);
-if ($showStars === true) {
+if (1 === $showStars) {
 
 if ($this->is_ten_scale_rating_platform()) {
 $ratingContent .= '<span class="ti-ten-rating-score">'. $this->formatTenRating($r->original_rating, $language) .'</span>';
@@ -6433,9 +6441,9 @@ $imageUrl = isset($pageDetails['avatar_url']) && $pageDetails['avatar_url'] ? $p
 $image2xUrl = $imageUrl;
 
 $size = $this->getHeaderProfileImageSize($styleId);
-$imageUrl = preg_replace('/([=-])(s\d+|w\d+-h\d+)/', "$1w$size-h$size", $imageUrl);
+$imageUrl = preg_replace('/([=-])(s\d+|w\d+-h\d+)/', "\$1w$size-h$size", $imageUrl);
 $size *= 2;
-$image2xUrl = preg_replace('/([=-])(s\d+|w\d+-h\d+)/', "$1w$size-h$size", $imageUrl);
+$image2xUrl = preg_replace('/([=-])(s\d+|w\d+-h\d+)/', "\$1w$size-h$size", $imageUrl);
 $profileImageListForButton = "";
 if ($reviews) {
 $max = $widgetTemplate['type'] === 'fomo' ? 3 : 5;
@@ -6501,6 +6509,7 @@ $this->get_rating_stars($this->is_ten_scale_rating_platform() ? $ratingScore / 2
 ], $content);
 if (!in_array($widgetTemplate['type'], [ 'button', 'badge', 'top-rated-badge', 'fomo' ]) && !$this->getWidgetOption('show-logos', false, $isPreview)) {
 $content = preg_replace('/<img class="ti-platform-icon".+>/U', '', $content);
+$content = preg_replace('/<img src="[^"]+\/assets\/platform\/[^"]+".+>/U', '', $content);
 }
 if ($this->is_ten_scale_rating_platform() && $styleId === 11) {
 $content = str_replace('<span class="ti-rating">'. $ratingScore .'</span> ', '', $content);
@@ -6548,7 +6557,7 @@ if ($this->isFomoCustomWidget() || $this->getFomoSubtitleTextChoices()) {
 if ($text = $this->getWidgetOption('fomo-title', false, $isPreview)) {
 $content = preg_replace(
 '/<div class="ti-title-text">(.+)<\/div>/U',
-'<div class="ti-title-text">'.$text.'</div>',
+'<div class="ti-title-text">'.wp_kses($text, ['u' => []]).'</div>',
 $content
 );
 }
@@ -6565,7 +6574,7 @@ $text = $widgetTemplate['params']['trans'][$language][$text];
 }
 $content = preg_replace(
 '/<div class="ti-subtitle-text">(.+)<\/div>/U',
-'<div class="ti-subtitle-text">'.$text.'</div>',
+'<div class="ti-subtitle-text">'.wp_kses($text, ['u' => []]).'</div>',
 $content
 );
 }
@@ -6818,7 +6827,7 @@ $rating = 5;
 }
 return $texts[ $rating - 1 ];
 }
-public function get_rating_stars($ratingScore, $platformStars = true)
+public function get_rating_stars($ratingScore, $platformStars)
 {
 $text = "";
 if (!is_numeric($ratingScore)) {
@@ -6826,28 +6835,28 @@ return $text;
 }
 $platform = ucfirst($this->getShortName());
 $altPlatform = $platform;
-if (!$platformStars) {
+if (0 === $platformStars) {
 $platform = 'Default';
 }
-$fullStarUrl = '<img class="ti-star" src="https://cdn.trustindex.io/assets/platform/'.$platform.'/star/f.svg" alt="'.$altPlatform.'" width="17" height="17" loading="lazy" />';
-if ('custom' === $platformStars) {
+$fullStarUrl = '<img class="ti-star" src="https://cdn.trustindex.io/assets/platform/'.$platform.'/star/f.svg" alt="'.$altPlatform.' star %star-number%" width="17" height="17" loading="lazy" />';
+if (2 === $platformStars) {
 $fullStarUrl = '<span class="ti-star f"></span>';
 }
 for ($si = 1; $si <= $ratingScore; $si++) {
-$text .= $fullStarUrl;
+$text .= str_replace('%star-number%', $si, $fullStarUrl);
 }
 $fractional = $ratingScore - floor($ratingScore);
-if(0.25 <= $fractional) {
+if (0.25 <= $fractional) {
 if ($fractional < 0.75) {
-$text .= preg_replace('/f(\.svg)?"/', 'h$1"', $fullStarUrl);
+$text .= preg_replace('/f(\.svg)?"/', 'h$1"', str_replace('%star-number%', $si.'.'.$fractional, $fullStarUrl));
 }
 else {
-$text .= $fullStarUrl;
+$text .= str_replace('%star-number%', $si, $fullStarUrl);
 }
 $si++;
 }
 for (; $si <= 5; $si++) {
-$text .= preg_replace('/f(\.svg)?"/', 'e$1"', $fullStarUrl);
+$text .= preg_replace('/f(\.svg)?"/', 'e$1"', str_replace('%star-number%', $si, $fullStarUrl));
 }
 return $text;
 }
